@@ -30,7 +30,7 @@ bool g_color = false;
 bool g_json = false;
 
 struct Options {
-    std::string model, vad, device, file;
+    std::string model, vad, device, file, mic_file;
     int decoder = PTSTT_DECODER_DEFAULT;
     double silence = 2.0, no_speech = 5.0, max = 30.0, threshold = 0.5;
     bool json = false, once = false, verbose = false, list_devices = false;
@@ -54,6 +54,7 @@ void usage(FILE* f) {
         "  --device NAME       capture device (substring of its name)\n"
         "  --list-devices      print the capture devices and exit\n"
         "  --file PATH         transcribe an audio file (WAV/FLAC/MP3) and exit\n"
+        "  --mic-file PATH     use an audio file as the microphone (testing)\n"
         "  --once              exit after the first transcript\n"
         "  --json              print each result as one JSON line\n"
         "  --verbose           show model and GPU backend logs\n"
@@ -192,6 +193,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (a == "--vad") { if (!(v = need(i))) return false; o.vad = v; }
         else if (a == "--device") { if (!(v = need(i))) return false; o.device = v; }
         else if (a == "--file") { if (!(v = need(i))) return false; o.file = v; }
+        else if (a == "--mic-file") { if (!(v = need(i))) return false; o.mic_file = v; }
         else if (a == "--silence") { if (!(v = need(i))) return false; o.silence = std::atof(v); }
         else if (a == "--no-speech") { if (!(v = need(i))) return false; o.no_speech = std::atof(v); }
         else if (a == "--max") { if (!(v = need(i))) return false; o.max = std::atof(v); }
@@ -253,7 +255,8 @@ int main(int argc, char** argv) {
     cfg.no_speech_timeout_ms = static_cast<int>(o.no_speech * 1000);
     cfg.max_utterance_ms = static_cast<int>(o.max * 1000);
     cfg.capture_device = o.device.empty() ? nullptr : o.device.c_str();
-    cfg.input_file = o.file.empty() ? nullptr : o.file.c_str();
+    const std::string& input = o.file.empty() ? o.mic_file : o.file;
+    cfg.input_file = input.empty() ? nullptr : input.c_str();
     cfg.verbose = o.verbose ? 1 : 0;
 
     if (interactive) status("\033[2m", "carregando modelos…");
