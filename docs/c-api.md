@@ -147,7 +147,7 @@ The events of one session, in order:
 | `PTSTT_EV_SPEECH_START` | The VAD detected speech (at most once per session) |
 | `PTSTT_EV_TRANSCRIBING` | The session ended (`stop_reason` set); the model is running |
 | `PTSTT_EV_ERROR` | Something failed (optional) |
-| `PTSTT_EV_RESULT` | The result is ready. The engine is already `PTSTT_IDLE`, so the callback may call `ptstt_start()` to listen again |
+| `PTSTT_EV_RESULT` | The result is ready. The engine is already `PTSTT_IDLE`, so the callback may call `ptstt_start()` to listen again. The result is queued for `ptstt_wait_result()` just before this event, so a waiting thread can wake before the callback runs |
 
 ## Threading and ownership
 

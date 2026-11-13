@@ -57,12 +57,13 @@ class TranscriberTest(unittest.TestCase):
         self.stt.on_event(on_event)
         try:
             r = self.stt.listen(timeout=60)
+            # listen() returns once the result is queued; the RESULT event follows on the worker thread.
+            self.assertTrue(done.wait(30))
         finally:
             self.stt.on_event(None)
         self.assertEqual(r.stop_reason, StopReason.SILENCE)
         self.assertIn("esquerda", r.text)
         self.assertGreater(r.speech_sec, 3.0)
-        self.assertTrue(done.wait(5))
         self.assertEqual(events[:3], [EventType.LISTENING, EventType.SPEECH_START, EventType.TRANSCRIBING])
         self.assertEqual(self.stt.state, State.IDLE)
 
