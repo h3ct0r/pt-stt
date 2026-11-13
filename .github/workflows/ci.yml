@@ -26,7 +26,7 @@ jobs:
           - name: Ubuntu 22.04 x64 (CPU)
             os: ubuntu-22.04
           - name: macOS arm64 (CPU)
-            os: macos-14
+            os: macos-15
 
     steps:
       - uses: actions/checkout@v4
