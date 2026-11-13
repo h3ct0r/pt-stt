@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu 22.04 arm64 (Jetson-like, CPU)
+            os: ubuntu-22.04-arm
+          - name: Ubuntu 22.04 x64 (CPU)
+            os: ubuntu-22.04
+          - name: macOS arm64 (CPU)
+            os: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache models
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: models-${{ hashFiles('scripts/fetch_models.sh') }}
+
+      - name: Fetch models
+        run: scripts/fetch_models.sh
+
+      - name: Configure
+        # GitHub's runners have no usable GPU: build the CPU backend, portable.
+        run: >
+          cmake -B build
+          -DPTSTT_BACKEND=cpu
+          -DPTSTT_NATIVE=OFF
+          -DPython3_EXECUTABLE="$(which python)"
+
+      - name: Build
+        run: cmake --build build -j 4
+
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: CLI smoke test
+        run: |
+          ./build/bin/ptstt-cli --version
+          ./build/bin/ptstt-cli --file tests/fixtures/speech.wav --json
