@@ -1,0 +1,1 @@
+O robô deve virar à esquerda e seguir em frente por dois metros.

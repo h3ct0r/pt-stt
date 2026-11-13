@@ -1,0 +1,23 @@
+# Build trees
+build/
+build-*/
+cmake-build-*/
+
+# Models (downloaded by scripts/fetch_models.sh)
+models/
+
+# Audio files, except the committed test fixtures
+*.wav
+!tests/fixtures/*.wav
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
